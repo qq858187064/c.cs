@@ -1382,7 +1382,7 @@ namespace C
                     cmd.Parameters.Clear();
                     bool hsp = p != null && p.Length > 0;
                     int pi = -1;//输出参数在存储过程中的位置索引
-                    if (hsp)
+                    if (hsp&&isProc)
                     {
                         pi = Db.Ps(cmd, p);
                     }
