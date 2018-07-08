@@ -1,0 +1,5 @@
+F:\Projects\Apps\C\bin\Release\C.dll
+F:\Projects\Apps\C\bin\Release\C.pdb
+F:\Projects\Apps\C\obj\Release\C.dll
+F:\Projects\Apps\C\obj\Release\C.pdb
+F:\Projects\Apps\C\obj\Release\C.csprojResolveAssemblyReference.cache

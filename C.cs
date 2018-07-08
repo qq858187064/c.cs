@@ -27,10 +27,12 @@ using System.Reflection.Emit;
 using System.Drawing.Imaging;
 
 #endregion
+
+
 namespace C
 {
 
-    #region  多播委托
+    #region  多播委托实例
     class MathOperations
     {
         public static void MultiplyByTwo(double value)
@@ -79,15 +81,11 @@ namespace C
         /// <summary>
         /// 已登录用户实体
         /// </summary>
-        public static u cu
-        {
-            get
-            {
+        public static u cu { get {
                 //if (session<u>("u") == null)
                 //    return Js();
                 return session<u>("u");
-            }
-        }
+            } }
 
         #endregion
         #region 泛型类型转换
@@ -472,7 +470,7 @@ namespace C
 
             MailMessage m = new MailMessage();
             //Message.SubjectEncoding = System.Text.Encoding.UTF8;
-            m.From = new MailAddress(account, "思念网");
+            m.From = new MailAddress(account, "万佛林");
             m.Body = body;
             m.IsBodyHtml = isHtml;
             m.To.Add(to);
@@ -662,7 +660,7 @@ namespace C
             f.SaveAs("");
             r = f.FileName;
             return r;
-        }
+        }    
         /// <summary>
         /// 根据传入路径创建文件夹
         /// </summary>
@@ -771,6 +769,7 @@ namespace C
             return p;
         }
         #endregion
+
         /*
         2. 读
 1).  第一种方式:
@@ -880,22 +879,37 @@ namespace C
 
 
         */
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     #region 扩展HtmlExtensions
     public static class HtmlExtensions
     {
         static string p = "jscss";//前缀
         public static MvcHtmlString runJs(this HtmlHelper htmlHelper, Func<object, HelperResult> template)
         {
-            if (http.isAjax)//如果是ajax原模板返回
-            {
-                return MvcHtmlString.Create(template(null).ToHtmlString());
-            }
-            else
-            { 
             string k = p + Guid.NewGuid();// new Random(111111).Next();
-            htmlHelper.ViewContext.HttpContext.Items.Add(k, template);
+            //htmlHelper.ViewContext.HttpContext.Items["_script_" + Guid.NewGuid()] = template;
+            htmlHelper.ViewContext.HttpContext.Items[k] = template;
             return MvcHtmlString.Empty;
-            }
         }
         public static IHtmlString RenderScripts(this HtmlHelper htmlHelper)
         {
@@ -932,6 +946,8 @@ namespace C
         }
     }
     #endregion
+
+
     #region 用于处理string的类
 
     public class str
@@ -1214,12 +1230,11 @@ namespace C
             }
         }
          ------------------------------_________________________________________________   */
+
+
     #region 用于处理http的类
-    public class http
+    public class h
     {
-        public static bool isAjax { get {
-                return C.hc.Request.Headers["X-Requested-With"] == "XMLHttpRequest" ? true : false;
-            } }
         //public System.Drawing.Image i;
         //public h(string url)
         //{
@@ -1257,7 +1272,7 @@ namespace C
 
 }*/
     #endregion
-   #region Db数据库相关
+    #region Db数据库相关
     /// <summary>
     /// 操作数据库的类
     /// </summary>
@@ -1323,7 +1338,7 @@ namespace C
             bool hc = tc.ContainsKey(nm);
             if (!hc)
                 con = new SqlConnection(conStr(nm));
-            else if (tc[nm] != null)//&&tc[nm].State == ConnectionState.Open
+            else if(tc[nm]!=null)//&&tc[nm].State == ConnectionState.Open
                 con = tc[nm];
             //SqlCommand Cmd = new SqlCommand(s, con);
             //Cmd.CommandType = CmdType == 0 ? CommandType.StoredProcedure : CommandType.Text;//string.IsNullOrEmpty(CmdType)
@@ -1367,7 +1382,7 @@ namespace C
                     cmd.Parameters.Clear();
                     bool hsp = p != null && p.Length > 0;
                     int pi = -1;//输出参数在存储过程中的位置索引
-                    if (hsp&& isProc)
+                    if (hsp)
                     {
                         pi = Db.Ps(cmd, p);
                     }
@@ -1411,7 +1426,7 @@ namespace C
                     con.Dispose();
 
                 }
-                else if (!tc.ContainsValue(con) && con.State == ConnectionState.Open)
+                else if (!tc.ContainsValue(con)&&con.State==ConnectionState.Open)
                 {
                     tc[con.Database] = con;
                 }
@@ -1649,7 +1664,7 @@ namespace C
         }
     }
     #endregion
-    #endregion 
+    #endregion
     #region 处理页面相关
     public class p
     {
