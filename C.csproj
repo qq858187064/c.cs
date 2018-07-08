@@ -48,10 +48,10 @@
       <HintPath>bin\System.Web.Helpers.dll</HintPath>
     </Reference>
     <Reference Include="System.Web.Mvc">
-      <HintPath>..\mvc\bin\System.Web.Mvc.dll</HintPath>
+      <HintPath>..\miss\bin\System.Web.Mvc.dll</HintPath>
     </Reference>
     <Reference Include="System.Web.Webpages">
-      <HintPath>..\mvc\bin\System.Web.Webpages.dll</HintPath>
+      <HintPath>..\miss\bin\System.Web.Webpages.dll</HintPath>
     </Reference>
     <Reference Include="System.Xml" />
     <Reference Include="System.Xml.Linq" />
