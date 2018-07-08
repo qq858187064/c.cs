@@ -1,0 +1,9 @@
+*.txt
+*.suo
+.suo
+*.sln
+.vs
+*.config
+/ct/
+/bin/
+/obj/
