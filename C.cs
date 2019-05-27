@@ -874,31 +874,7 @@ namespace C
         BackFunPage = 5
     }
 
-
-
-
-
         */
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
     #region 扩展HtmlExtensions
     public static class HtmlExtensions
@@ -907,7 +883,6 @@ namespace C
         public static MvcHtmlString runJs(this HtmlHelper htmlHelper, Func<object, HelperResult> template)
         {
             string k = p + Guid.NewGuid();// new Random(111111).Next();
-            //htmlHelper.ViewContext.HttpContext.Items["_script_" + Guid.NewGuid()] = template;
             htmlHelper.ViewContext.HttpContext.Items[k] = template;
             return MvcHtmlString.Empty;
         }
@@ -1233,7 +1208,17 @@ namespace C
 
 
     #region 用于处理http的类
-    public class h
+    public class http
+    {
+        public static bool isAjax
+        {
+            get
+            {
+                return C.hc.Request.Headers["X-Requested-With"] == "XMLHttpRequest" ? true : false;
+            }
+        }
+    }
+        public class h
     {
         //public System.Drawing.Image i;
         //public h(string url)
