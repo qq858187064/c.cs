@@ -105,6 +105,10 @@ namespace C
         {
             return Ps;
         }
+        public static T[] Arr<T>(params T[] Ps)
+        {
+            return Ps;
+        }
         #endregion
         #region 操作Config文件
         public static string Gfig(string Key)
@@ -119,7 +123,12 @@ namespace C
         }
         #endregion
 
-        #region 用SqlDataReader将行的内容读入Array并返回
+        #region 用SqlDataReader第一行的内容读入Array并返回
+        /// <summary>
+        /// 未遍历行，只能取第一行
+        /// </summary>
+        /// <param name="Reader"></param>
+        /// <returns></returns>
         public static object[] ToArray(SqlDataReader Reader)
         {
             int n = Reader.FieldCount;
@@ -144,7 +153,7 @@ namespace C
 
         #endregion
 
-        #region 用SqlDataReader将行的内容读入List并返回
+        #region 用SqlDataReader将行的内容读入List并返回  该方法应该有错误
         public static List<object[]> ToList(SqlDataReader Reader)
         {
             List<object[]> Ls = new List<object[]>();
@@ -1828,6 +1837,29 @@ namespace C
         }
     }
     #endregion
+
+
+    #region 处理控件相关
+    /// <summary>
+    /// 模块基类
+    /// </summary>
+    public class mo
+    {
+        //public string tg { get; set; }//标签名
+        //public string cls { get; set; }//样式名
+       public int id{ get; set; }//模块实例
+        public string tit { get; set; }//模块标题
+        public string url { get; set; }//标题url
+        public string m { get; set; }//标题上的更多
+        public string m { get; set; }//temp
+        //public int did { get; set; }//控件实例记录id
+        public mo()
+        {
+
+         }
+    }
+    #endregion
+
     #region 处理控件相关
     /// <summary>
     /// 所有自定义控件的父类
