@@ -1851,7 +1851,7 @@ namespace C
         public string tit { get; set; }//模块标题
         public string url { get; set; }//标题url
         public string m { get; set; }//标题上的更多
-        public string m { get; set; }//temp
+       // public string m { get; set; }//temp
         //public int did { get; set; }//控件实例记录id
         public mo()
         {
