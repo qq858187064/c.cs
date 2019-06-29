@@ -84,6 +84,7 @@ namespace C
         public static u cu { get {
                 //if (session<u>("u") == null)
                 //    return Js();
+            //如果session中没有，跳到登录？
                 return session<u>("u");
             } }
 
