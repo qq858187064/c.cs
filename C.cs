@@ -557,25 +557,22 @@ namespace C
         }
         #endregion
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="t"></param>
+        /// <returns></returns>
+        public static object timeTostring(DateTime t,string p){
 
+            object r = "";
+            if (t != DateTime.MinValue)
+                r = t.ToString(p);
+            return r;
+        }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+        
     }
+
     /*
     /// <summary>
     /// 该类中的ToDynamic方法，用于从任意对象扩展出一个动态类型的对象。这个动态类型会根据输入对象中的属性信息，生成对应的公有字段，然后使用反射进行赋值。
