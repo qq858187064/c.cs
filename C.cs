@@ -25,7 +25,7 @@ using System.Web.WebPages;
 using System.Collections.Concurrent;
 using System.Reflection.Emit;
 using System.Drawing.Imaging;
-
+using System.Web.Script.Serialization;
 #endregion
 
 
@@ -563,13 +563,57 @@ namespace C
         /// <param name="t"></param>
         /// <returns></returns>
         public static object timeTostring(DateTime t,string p){
-
             object r = "";
             if (t != DateTime.MinValue)
                 r = t.ToString(p);
             return r;
         }
+  /// <summary>
+            /// 将对象序列化（serialize）成json字符串
+            /// </summary>
+            public static string ser<T>(T o)
+            {
+                return new JavaScriptSerializer().Serialize(o);
+            }
+            /// <summary>
+            /// 将json字符串反序列化成对象
+            /// </summary>
+            public static T deser<T>(string json)
+            {
+                return (T)new JavaScriptSerializer().Deserialize(json, typeof(T));
+            }
 
+        /*
+        //json 序列化
+
+        public static string ToJsJson(object item)
+        {
+            DataContractJsonSerializer serializer = new DataContractJsonSerializer(item.GetType());
+            using (MemoryStream ms = new MemoryStream())
+            {
+                serializer.WriteObject(ms, item);
+                StringBuilder sb = new StringBuilder();
+                sb.Append(Encoding.UTF8.GetString(ms.ToArray()));
+                return sb.ToString();
+            }
+        }
+
+        //反序列化
+
+        public static T FromJsonTo<T>(string jsonString)
+        {
+            DataContractJsonSerializer ser = new DataContractJsonSerializer(typeof(T));
+            using (MemoryStream ms = new MemoryStream(Encoding.UTF8.GetBytes(jsonString)))
+            {
+                T jsonObject = (T)ser.ReadObject(ms);
+                return jsonObject;
+            }
+        }
+
+        public class json
+        {
+          
+        }*/
         
     }
 
@@ -1158,59 +1202,7 @@ namespace C
 
 
 
-        //json 序列化
-
-    public static string ToJsJson(object item)
-    {
-        DataContractJsonSerializer serializer = new DataContractJsonSerializer(item.GetType());
-        using(MemoryStream ms=new MemoryStream())
-        {
-            serializer.WriteObject(ms, item);
-            StringBuilder sb = new StringBuilder();
-            sb.Append(Encoding.UTF8.GetString(ms.ToArray()));
-            return sb.ToString();
-        }
-    }
-
-    //反序列化
-
-    public static T FromJsonTo<T>(string jsonString)
-    {
-        DataContractJsonSerializer ser = new DataContractJsonSerializer(typeof(T));
-        using (MemoryStream ms = new MemoryStream(Encoding.UTF8.GetBytes(jsonString)))
-        {
-            T jsonObject = (T)ser.ReadObject(ms);
-            return jsonObject;
-        }
-    }
-
-        public class json
-        {
-            /// <summary>
-            /// 将对象序列化（serialize）成json字符串
-            /// </summary>
-            public static string ser<T>(T o)
-            {
-                using (MemoryStream ms = new MemoryStream())
-                {
-                    new DataContractJsonSerializer(typeof(T)).WriteObject(ms, o);
-                    return Encoding.UTF8.GetString(ms.ToArray());
-                }
-            }
-            /// <summary>
-            /// 将json字符串反序列化成对象
-            /// </summary>
-            public static T deser<T>(string json)
-            {
-                //双引号问题未解决
-                //json = json.Replace('\"', '\"');
-                // json = json.replace(/\"/gi,"""");
-                using (MemoryStream ms = new MemoryStream(Encoding.UTF8.GetBytes(json)))
-                {
-                    return (T)(new DataContractJsonSerializer(typeof(T)).ReadObject(ms));
-                }
-            }
-        }
+     
          ------------------------------_________________________________________________   */
 
 
@@ -2024,7 +2016,7 @@ namespace C
     {
         public HttpWebResponse rsp;
         public Stream strm;
-        public string charset, html, title, body, time, author, origin;
+        public string charset, html, title, body, time, author, origin, rs;
         public picker(string url, string encoding = "", int times = 5000)
         {
             //WebClient wc=new WebClient();
@@ -2034,15 +2026,19 @@ namespace C
 
             HttpWebRequest rqt = WebRequest.Create(url) as HttpWebRequest;
             //rqt.KeepAlive = true;
-
+            //rqt.ContentType = "application/json; charset=utf-8";
             rqt.Timeout = times;
             rqt.UserAgent = "MSIE 7.0; Windows NT 5.1";
             //Mozilla/5.0 (Windows NT 6.3; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.96 Safari/537.36
             try
             {
+
                 this.rsp = rqt.GetResponse() as HttpWebResponse;//ISO-8859-1GB2312
+
                 charset = string.IsNullOrWhiteSpace(encoding) ? (rsp.CharacterSet == "ISO-8859-1" ? "GB2312" : string.IsNullOrWhiteSpace(rsp.CharacterSet) ? "UTF-8" : rsp.CharacterSet) : encoding;
+               // rsp.ContentType = "application/json; charset=utf-8";
                 this.strm = rsp.GetResponseStream();
+                this.rs = new StreamReader(this.strm).ReadToEnd();
                 // ServicePointManager.DefaultConnectionLimit = 200;
             }
             catch (WebException e)
@@ -2184,8 +2180,8 @@ namespace C
     #region 计时器
     public class timer
     {
-        private Timer t;
-        public Timer T
+        private System.Threading.Timer t;
+        public System.Threading.Timer T
         {
             get { return t; }
             set { t = value; }
