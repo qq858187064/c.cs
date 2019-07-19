@@ -558,12 +558,75 @@ namespace C
         #endregion
 
         /// <summary>
+        /// 发送请求
+        /// </summary>
+        /// <param name="url">请求的路径</param>
+        /// <param name="method">请求方法，默认为get</param>
+        /// <returns></returns>
+        public static string req(string url,string method="GET",string param="")
+        {
+          
+          HttpWebResponse rsp=null;
+         Stream strm=null;
+         string charset, rs="";
+           if(method==null)
+           {
+               method = "GET";
+           }
+            HttpWebRequest rqt = WebRequest.Create(url) as HttpWebRequest;
+            rqt.Method = method;
+
+            if (method == "POST"&&param!="")
+            {
+                byte[] data = Encoding.UTF8.GetBytes(param);
+                //写入请求流
+                using (Stream stream = rqt.GetRequestStream())
+                {
+                    stream.Write(data, 0, data.Length);
+                }
+            }
+
+
+            //rqt.KeepAlive = true;
+            //rqt.ContentType = "application/json; charset=utf-8";
+            //rqt.Timeout = times;
+            rqt.UserAgent = "MSIE 7.0; Windows NT 5.1";
+            //Mozilla/5.0 (Windows NT 6.3; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.96 Safari/537.36
+            try
+            {
+                string encoding = "";//可以参数化
+                rsp = rqt.GetResponse() as HttpWebResponse;//ISO-8859-1GB2312
+                charset = string.IsNullOrWhiteSpace(encoding) ? (rsp.CharacterSet == "ISO-8859-1" ? "GB2312" : string.IsNullOrWhiteSpace(rsp.CharacterSet) ? "UTF-8" : rsp.CharacterSet) : encoding;
+               // rsp.ContentType = "application/json; charset=utf-8";
+                strm = rsp.GetResponseStream();
+                rs = new StreamReader(strm).ReadToEnd();
+                // ServicePointManager.DefaultConnectionLimit = 200;
+            }
+            catch (WebException e)
+            {
+                //[WebException: 远程服务器返回错误: (404) 未找到。]
+                //this.rsp = rqt.GetResponse() as HttpWebResponse;操作超时
+                //if (resp.StatusCode != HttpStatusCode.OK) //如果服务器未响应，那么继续等待相应
+                //    continue;
+                ;
+            }
+            finally
+            {
+                rsp.Close();
+                strm.Dispose();
+                strm.Close();
+            }
+            return rs;
+        }
+
+
+        /// <summary>
         /// 
         /// </summary>
         /// <param name="t"></param>
         /// <returns></returns>
-        public static object timeTostring(DateTime t,string p){
-            object r = "";
+        public static string timeTostring(DateTime t,string p){
+            string r = "";
             if (t != DateTime.MinValue)
                 r = t.ToString(p);
             return r;
@@ -581,6 +644,34 @@ namespace C
             public static T deser<T>(string json)
             {
                 return (T)new JavaScriptSerializer().Deserialize(json, typeof(T));
+            }
+            /// <summary>
+            /// 生成验证码
+            /// </summary>
+            /// <param name="l">验证码长度</param>
+            /// <param name="ct">验证码组成字符的类型0为纯数字0-9,1为config的vczm中指定的纯字母，2为config的vcs中指定字符（多用于pc版）</param>
+            /// <returns></returns>
+           public static string code(int l, int ct = 0)
+            {
+                System.Web.SessionState.HttpSessionState ss = C.hc.Session;
+                string k = ct == 1 ? "vczm" : "vcs",
+                    o = ct == 0 ? "0123456789" : ConfigurationManager.AppSettings[k],
+                        c = "";
+                Random r = new Random();
+                for (int i = 0; i < l; i++)
+                {
+                    c += o[r.Next(1, o.Length - 1)];//Convert.ToChar(r.[Next](65, 90))//从随机数直接转换成字母
+                }
+                //存入session，暂时不用token，键名规则？
+                // ss.Add(kyzm, c);
+                ss.Add(ss.SessionID, c);
+                /*
+                string token = DateTime.Now.ToString("ddHHmmss") + r.Next(1000, 9999);
+                //aes.ecode(userId + time + info + key(密钥)
+                //aes.decode(token)
+                //token可以使用 md5(username + userid + timestamp)_timestamp, 
+                */
+                return c;
             }
 
         /*
@@ -2195,7 +2286,7 @@ namespace C
         //private AutoResetEvent e = new AutoResetEvent(false);解决方法重入问题
         public timer(TimerCallback cb, string[] arg, string id, int due, int period)
         {
-            t = new Timer(cb, arg, due, period);
+            t = new System.Threading.Timer(cb, arg, due, period);
             ls.Add(id, this);
         }
         public static int stop(string id)
