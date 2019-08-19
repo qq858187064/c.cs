@@ -438,25 +438,10 @@ namespace C
         /// </summary>
         /// <param name="key">参数名称</param>
         /// <returns></returns>
-        public static string GetQueryString(string key)
+        public static string qs(string k)
         {
-            HttpContext context = C.hc;
-            if (context == null)
-                return string.Empty;
-
-            string result = string.Empty;
-            foreach (string item in context.Request.QueryString.Keys)
-            {
-                if (item.ToLower() == key.ToLower())
-                {
-                    result = context.Request.QueryString[key];
-                    break;
-                }
-            }
-            return result;
+            return C.hc.Request.QueryString[k];
         }
-        //HttpContext hc { get { return HttpContext.Current; } }
-
         #endregion
         #region 发邮件
 
