@@ -26,3 +26,4 @@ E:\C\bin\Debug\C.pdb
 E:\C\obj\Debug\C.dll
 E:\C\obj\Debug\C.pdb
 E:\C\obj\Debug\C.csprojResolveAssemblyReference.cache
+E:\C\bin\Debug\Newtonsoft.Json.dll

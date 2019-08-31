@@ -26,6 +26,8 @@ using System.Collections.Concurrent;
 using System.Reflection.Emit;
 using System.Drawing.Imaging;
 using System.Web.Script.Serialization;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 #endregion
 
 
@@ -617,18 +619,36 @@ namespace C
             return r;
         }
   /// <summary>
-            /// 将对象序列化（serialize）成json字符串
+        /// 将对象序列化（serialize）成json字符串 考虑换成Newtonjson
             /// </summary>
-            public static string ser<T>(T o)
+            /// 
+
+        /*
+         var json = JsonConvert.SerializeObject(p);
+Console.WriteLine(json);
+
+var pp = JsonConvert.DeserializeObject<Person>(json);
+Console.WriteLine(pp.Name);
+
+var jobj = JsonConvert.DeserializeObject(json) as JObject;
+Console.WriteLine(jobj.GetType());
+foreach (var item in jobj)
+{
+    Console.WriteLine($"{item.Key}:{item.Value}");
+}
+         */
+        public static string ser<T>(T o)
             {
-                return new JavaScriptSerializer().Serialize(o);
+                //return new JavaScriptSerializer().Serialize(o);
+                return JsonConvert.SerializeObject(o);
             }
             /// <summary>
             /// 将json字符串反序列化成对象
             /// </summary>
-            public static T deser<T>(string json)
+        public static JObject deser(string json)
             {
-                return (T)new JavaScriptSerializer().Deserialize(json, typeof(T));
+                //return (T)new JavaScriptSerializer().Deserialize(json, typeof(T));
+                return JsonConvert.DeserializeObject(json) as JObject;
             }
             /// <summary>
             /// 生成验证码
@@ -1463,7 +1483,7 @@ namespace C
                 if (isDs)
                     tmp = (T)(object)ds; //(T)Convert.ChangeType(ds, typeof(T));
 
-                cmd.Dispose();
+                cmd.Dispose();//相册页报错ConnectionString 属性尚未初始化
             }
             catch (SqlException e)
             {
