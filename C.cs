@@ -84,10 +84,32 @@ namespace C
         /// 已登录用户实体
         /// </summary>
         public static u cu { get {
-                //if (session<u>("u") == null)
-                //    return Js();
+            u cu = session<u>("u");
+            if (cu == null && C.hc.Request.Path != "/login")
+               {
+                   //最好触发js弹出登录框
+                   //C.hc.Response.StatusCode = 403;
+                   string p = "~/login?url=" + C.hc.Request.Path;
+                   C.hc.Response.Write(p);
+                   C.hc.Server.TransferRequest(p);
+                   //C.hc.Response.End();
+                   /*
+                   ContentResult cr = new ContentResult();
+                   cr.Content = "<script>alert(123)</script>";
+                   C.hc.Response.Write(cr);
+                   //Content("<script>alert(123)</script>");
+                   
+                  // C.hc.Response.Write("<script>alert(123)</script>");
+                   //C.hc.Response.End();
+                   */
+                  
+                   //Exception er = new Exception("current user null");
+
+                   //throw er;
+               }
+               return cu;
             //如果session中没有，跳到登录？
-                return session<u>("u");
+                 //return session<u>("u");
             } }
 
         #endregion
@@ -1740,7 +1762,7 @@ foreach (var item in jobj)
         /// <returns>bool</returns>
         public static bool isNull(object o)
         {
-            return (o is DBNull || string.IsNullOrWhiteSpace(o.ToString()));
+            return (o==null||o is DBNull || string.IsNullOrWhiteSpace(o.ToString()));
         }
     }
     #endregion
