@@ -85,15 +85,20 @@ namespace C
         /// </summary>
         public static u cu { get {
             u cu = session<u>("u");
+            /**/  
             if (cu == null && C.hc.Request.Path != "/login")
                {
                    //最好触发js弹出登录框
                    //C.hc.Response.StatusCode = 403;
                    string p = "~/login?url=" + C.hc.Request.Path;
-                   C.hc.Response.Write(p);
                    C.hc.Server.TransferRequest(p);
                    //C.hc.Response.End();
-                   /*
+      
+                  
+                   //Exception er = new Exception("current user null");
+
+                   //throw er;
+               }           /*
                    ContentResult cr = new ContentResult();
                    cr.Content = "<script>alert(123)</script>";
                    C.hc.Response.Write(cr);
@@ -102,11 +107,6 @@ namespace C
                   // C.hc.Response.Write("<script>alert(123)</script>");
                    //C.hc.Response.End();
                    */
-                  
-                   //Exception er = new Exception("current user null");
-
-                   //throw er;
-               }
                return cu;
             //如果session中没有，跳到登录？
                  //return session<u>("u");
