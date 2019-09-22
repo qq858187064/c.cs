@@ -86,7 +86,8 @@ namespace C
         public static u cu { get {
             u cu = session<u>("u");
             /**/  
-            if (cu == null && C.hc.Request.Path != "/login")
+            /*
+             * if (cu == null && C.hc.Request.Path != "/login")
                {
                    //最好触发js弹出登录框
                    //C.hc.Response.StatusCode = 403;
@@ -98,12 +99,11 @@ namespace C
                    //Exception er = new Exception("current user null");
 
                    //throw er;
-               }           /*
+               }         
                    ContentResult cr = new ContentResult();
                    cr.Content = "<script>alert(123)</script>";
                    C.hc.Response.Write(cr);
                    //Content("<script>alert(123)</script>");
-                   
                   // C.hc.Response.Write("<script>alert(123)</script>");
                    //C.hc.Response.End();
                    */
@@ -1426,7 +1426,6 @@ foreach (var item in jobj)
             //    con.Dispose();
             //}
         }
-
         /// <summary>
         /// 根据传入name创建并返回SqlConnection对象
         /// </summary>
@@ -1448,6 +1447,34 @@ foreach (var item in jobj)
         }
         //public static T Exec<T>(string CmdStr, Dg<T> Ex, int CmdType = 0,int Cls = 1, string ConNm = null,  params object[] Ps)
 
+
+        /*
+        public static void ss(object[] a)
+        {
+            string k = "sql";
+            if(C.hc.Session[k]==null)
+            {//先假定数组长度为5
+                C.hc.Session[k] = new object[5][];
+            }
+            (C.hc.Session[k] as object[5][])
+
+            //   Session["myArray"] = new string[]{"Hello","World"};
+      //  string[] myArray = Session["myArray"] as string[];
+        }
+
+
+        /// <summary>
+        /// 将传入查询集合，集中查询之后返回dataset
+        /// </summary>
+        /// <returns></returns>
+
+        public static DataSet cmds(object[] a) {
+
+           
+
+            DataSet ds = new DataSet();
+            return ds;
+        }*/
         public static T cmd<T>(string cmdStr, Dg<T> ex, int cmdType = 0, int cls = 1, string cn = "", params object[] ps)
         {
             T tmp = default(T);
