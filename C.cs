@@ -85,28 +85,23 @@ namespace C
         /// </summary>
         public static u cu { get {
             u cu = session<u>("u");
-            /**/  
             /*
-             * if (cu == null && C.hc.Request.Path != "/login")
+              if (cu == null && C.hc.Request.Path != "/login")
                {
                    //最好触发js弹出登录框
                    //C.hc.Response.StatusCode = 403;
                    string p = "~/login?url=" + C.hc.Request.Path;
                    C.hc.Server.TransferRequest(p);
                    //C.hc.Response.End();
-      
-                  
-                   //Exception er = new Exception("current user null");
 
-                   //throw er;
-               }         
+
                    ContentResult cr = new ContentResult();
                    cr.Content = "<script>alert(123)</script>";
-                   C.hc.Response.Write(cr);
-                   //Content("<script>alert(123)</script>");
-                  // C.hc.Response.Write("<script>alert(123)</script>");
-                   //C.hc.Response.End();
-                   */
+                   C.hc.Response.Write(cr.Content);
+                   //Exception er = new Exception("current user null");
+                   //throw er;
+               }   */      
+
                return cu;
             //如果session中没有，跳到登录？
                  //return session<u>("u");
@@ -1660,7 +1655,13 @@ foreach (var item in jobj)
         }
         public static T Scalar<T>(SqlCommand Cmd)
         {
-            return (T)Cmd.ExecuteScalar();
+            T tmp = default(T);
+            object t = Cmd.ExecuteScalar();
+            if(t!=null)
+            {
+                tmp = (T)t;
+            }
+            return tmp;
         }
 
         public static SqlDataReader Reader(SqlCommand Cmd)
