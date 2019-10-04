@@ -25,7 +25,9 @@ using System.Web.WebPages;
 using System.Collections.Concurrent;
 using System.Reflection.Emit;
 using System.Drawing.Imaging;
-
+using System.Web.Script.Serialization;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 #endregion
 
 
@@ -82,10 +84,27 @@ namespace C
         /// 已登录用户实体
         /// </summary>
         public static u cu { get {
-                //if (session<u>("u") == null)
-                //    return Js();
+            u cu = session<u>("u");
+            /*
+              if (cu == null && C.hc.Request.Path != "/login")
+               {
+                   //最好触发js弹出登录框
+                   //C.hc.Response.StatusCode = 403;
+                   string p = "~/login?url=" + C.hc.Request.Path;
+                   C.hc.Server.TransferRequest(p);
+                   //C.hc.Response.End();
+
+
+                   ContentResult cr = new ContentResult();
+                   cr.Content = "<script>alert(123)</script>";
+                   C.hc.Response.Write(cr.Content);
+                   //Exception er = new Exception("current user null");
+                   //throw er;
+               }   */      
+
+               return cu;
             //如果session中没有，跳到登录？
-                return session<u>("u");
+                 //return session<u>("u");
             } }
 
         #endregion
@@ -438,25 +457,10 @@ namespace C
         /// </summary>
         /// <param name="key">参数名称</param>
         /// <returns></returns>
-        public static string GetQueryString(string key)
+        public static string qs(string k)
         {
-            HttpContext context = C.hc;
-            if (context == null)
-                return string.Empty;
-
-            string result = string.Empty;
-            foreach (string item in context.Request.QueryString.Keys)
-            {
-                if (item.ToLower() == key.ToLower())
-                {
-                    result = context.Request.QueryString[key];
-                    break;
-                }
-            }
-            return result;
+            return C.hc.Request.QueryString[k];
         }
-        //HttpContext hc { get { return HttpContext.Current; } }
-
         #endregion
         #region 发邮件
 
@@ -558,18 +562,171 @@ namespace C
         #endregion
 
         /// <summary>
+        /// 发送请求
+        /// </summary>
+        /// <param name="url">请求的路径</param>
+        /// <param name="method">请求方法，默认为get</param>
+        /// <returns></returns>
+        public static string req(string url,string method="GET",string param="")
+        {
+          
+          HttpWebResponse rsp=null;
+         Stream strm=null;
+         string charset, rs="";
+           if(method==null)
+           {
+               method = "GET";
+           }
+            HttpWebRequest rqt = WebRequest.Create(url) as HttpWebRequest;
+            rqt.Method = method;
+
+            if (method == "POST"&&param!="")
+            {
+                byte[] data = Encoding.UTF8.GetBytes(param);
+                //写入请求流
+                using (Stream stream = rqt.GetRequestStream())
+                {
+                    stream.Write(data, 0, data.Length);
+                }
+            }
+
+
+            //rqt.KeepAlive = true;
+            //rqt.ContentType = "application/json; charset=utf-8";
+            //rqt.Timeout = times;
+            rqt.UserAgent = "MSIE 7.0; Windows NT 5.1";
+            //Mozilla/5.0 (Windows NT 6.3; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.96 Safari/537.36
+            try
+            {
+                string encoding = "";//可以参数化
+                rsp = rqt.GetResponse() as HttpWebResponse;//ISO-8859-1GB2312
+                charset = string.IsNullOrWhiteSpace(encoding) ? (rsp.CharacterSet == "ISO-8859-1" ? "GB2312" : string.IsNullOrWhiteSpace(rsp.CharacterSet) ? "UTF-8" : rsp.CharacterSet) : encoding;
+               // rsp.ContentType = "application/json; charset=utf-8";
+                strm = rsp.GetResponseStream();
+                rs = new StreamReader(strm).ReadToEnd();
+                // ServicePointManager.DefaultConnectionLimit = 200;
+            }
+            catch (WebException e)
+            {
+                //[WebException: 远程服务器返回错误: (404) 未找到。]
+                //this.rsp = rqt.GetResponse() as HttpWebResponse;操作超时
+                //if (resp.StatusCode != HttpStatusCode.OK) //如果服务器未响应，那么继续等待相应
+                //    continue;
+                ;
+            }
+            finally
+            {
+                rsp.Close();
+                strm.Dispose();
+                strm.Close();
+            }
+            return rs;
+        }
+
+
+        /// <summary>
         /// 
         /// </summary>
         /// <param name="t"></param>
         /// <returns></returns>
-        public static object timeTostring(DateTime t,string p){
-
-            object r = "";
+        public static string timeTostring(DateTime t,string p){
+            string r = "";
             if (t != DateTime.MinValue)
                 r = t.ToString(p);
             return r;
         }
+  /// <summary>
+        /// 将对象序列化（serialize）成json字符串 考虑换成Newtonjson
+            /// </summary>
+            /// 
 
+        /*
+         var json = JsonConvert.SerializeObject(p);
+Console.WriteLine(json);
+
+var pp = JsonConvert.DeserializeObject<Person>(json);
+Console.WriteLine(pp.Name);
+
+var jobj = JsonConvert.DeserializeObject(json) as JObject;
+Console.WriteLine(jobj.GetType());
+foreach (var item in jobj)
+{
+    Console.WriteLine($"{item.Key}:{item.Value}");
+}
+         */
+        public static string ser<T>(T o)
+            {
+                //return new JavaScriptSerializer().Serialize(o);
+                return JsonConvert.SerializeObject(o);
+            }
+            /// <summary>
+            /// 将json字符串反序列化成对象
+            /// </summary>
+        public static JObject deser(string json)
+            {
+                //return (T)new JavaScriptSerializer().Deserialize(json, typeof(T));
+                return JsonConvert.DeserializeObject(json) as JObject;
+            }
+            /// <summary>
+            /// 生成验证码
+            /// </summary>
+            /// <param name="l">验证码长度</param>
+            /// <param name="ct">验证码组成字符的类型0为纯数字0-9,1为config的vczm中指定的纯字母，2为config的vcs中指定字符（多用于pc版）</param>
+            /// <returns></returns>
+           public static string code(int l, int ct = 0)
+            {
+                System.Web.SessionState.HttpSessionState ss = C.hc.Session;
+                string k = ct == 1 ? "vczm" : "vcs",
+                    o = ct == 0 ? "0123456789" : ConfigurationManager.AppSettings[k],
+                        c = "";
+                Random r = new Random();
+                for (int i = 0; i < l; i++)
+                {
+                    c += o[r.Next(1, o.Length - 1)];//Convert.ToChar(r.[Next](65, 90))//从随机数直接转换成字母
+                }
+                //存入session，暂时不用token，键名规则？
+                // ss.Add(kyzm, c);
+                ss.Add(ss.SessionID, c);
+                /*
+                string token = DateTime.Now.ToString("ddHHmmss") + r.Next(1000, 9999);
+                //aes.ecode(userId + time + info + key(密钥)
+                //aes.decode(token)
+                //token可以使用 md5(username + userid + timestamp)_timestamp, 
+                */
+                return c;
+            }
+
+        /*
+        //json 序列化
+
+        public static string ToJsJson(object item)
+        {
+            DataContractJsonSerializer serializer = new DataContractJsonSerializer(item.GetType());
+            using (MemoryStream ms = new MemoryStream())
+            {
+                serializer.WriteObject(ms, item);
+                StringBuilder sb = new StringBuilder();
+                sb.Append(Encoding.UTF8.GetString(ms.ToArray()));
+                return sb.ToString();
+            }
+        }
+
+        //反序列化
+
+        public static T FromJsonTo<T>(string jsonString)
+        {
+            DataContractJsonSerializer ser = new DataContractJsonSerializer(typeof(T));
+            using (MemoryStream ms = new MemoryStream(Encoding.UTF8.GetBytes(jsonString)))
+            {
+                T jsonObject = (T)ser.ReadObject(ms);
+                return jsonObject;
+            }
+        }
+
+        public class json
+        {
+          
+        }*/
         
     }
 
@@ -1158,59 +1315,7 @@ namespace C
 
 
 
-        //json 序列化
-
-    public static string ToJsJson(object item)
-    {
-        DataContractJsonSerializer serializer = new DataContractJsonSerializer(item.GetType());
-        using(MemoryStream ms=new MemoryStream())
-        {
-            serializer.WriteObject(ms, item);
-            StringBuilder sb = new StringBuilder();
-            sb.Append(Encoding.UTF8.GetString(ms.ToArray()));
-            return sb.ToString();
-        }
-    }
-
-    //反序列化
-
-    public static T FromJsonTo<T>(string jsonString)
-    {
-        DataContractJsonSerializer ser = new DataContractJsonSerializer(typeof(T));
-        using (MemoryStream ms = new MemoryStream(Encoding.UTF8.GetBytes(jsonString)))
-        {
-            T jsonObject = (T)ser.ReadObject(ms);
-            return jsonObject;
-        }
-    }
-
-        public class json
-        {
-            /// <summary>
-            /// 将对象序列化（serialize）成json字符串
-            /// </summary>
-            public static string ser<T>(T o)
-            {
-                using (MemoryStream ms = new MemoryStream())
-                {
-                    new DataContractJsonSerializer(typeof(T)).WriteObject(ms, o);
-                    return Encoding.UTF8.GetString(ms.ToArray());
-                }
-            }
-            /// <summary>
-            /// 将json字符串反序列化成对象
-            /// </summary>
-            public static T deser<T>(string json)
-            {
-                //双引号问题未解决
-                //json = json.Replace('\"', '\"');
-                // json = json.replace(/\"/gi,"""");
-                using (MemoryStream ms = new MemoryStream(Encoding.UTF8.GetBytes(json)))
-                {
-                    return (T)(new DataContractJsonSerializer(typeof(T)).ReadObject(ms));
-                }
-            }
-        }
+     
          ------------------------------_________________________________________________   */
 
 
@@ -1316,7 +1421,6 @@ namespace C
             //    con.Dispose();
             //}
         }
-
         /// <summary>
         /// 根据传入name创建并返回SqlConnection对象
         /// </summary>
@@ -1338,6 +1442,34 @@ namespace C
         }
         //public static T Exec<T>(string CmdStr, Dg<T> Ex, int CmdType = 0,int Cls = 1, string ConNm = null,  params object[] Ps)
 
+
+        /*
+        public static void ss(object[] a)
+        {
+            string k = "sql";
+            if(C.hc.Session[k]==null)
+            {//先假定数组长度为5
+                C.hc.Session[k] = new object[5][];
+            }
+            (C.hc.Session[k] as object[5][])
+
+            //   Session["myArray"] = new string[]{"Hello","World"};
+      //  string[] myArray = Session["myArray"] as string[];
+        }
+
+
+        /// <summary>
+        /// 将传入查询集合，集中查询之后返回dataset
+        /// </summary>
+        /// <returns></returns>
+
+        public static DataSet cmds(object[] a) {
+
+           
+
+            DataSet ds = new DataSet();
+            return ds;
+        }*/
         public static T cmd<T>(string cmdStr, Dg<T> ex, int cmdType = 0, int cls = 1, string cn = "", params object[] ps)
         {
             T tmp = default(T);
@@ -1395,7 +1527,7 @@ namespace C
                 if (isDs)
                     tmp = (T)(object)ds; //(T)Convert.ChangeType(ds, typeof(T));
 
-                cmd.Dispose();
+                cmd.Dispose();//相册页报错ConnectionString 属性尚未初始化
             }
             catch (SqlException e)
             {
@@ -1523,7 +1655,13 @@ namespace C
         }
         public static T Scalar<T>(SqlCommand Cmd)
         {
-            return (T)Cmd.ExecuteScalar();
+            T tmp = default(T);
+            object t = Cmd.ExecuteScalar();
+            if(t!=null)
+            {
+                tmp = (T)t;
+            }
+            return tmp;
         }
 
         public static SqlDataReader Reader(SqlCommand Cmd)
@@ -1652,7 +1790,7 @@ namespace C
         /// <returns>bool</returns>
         public static bool isNull(object o)
         {
-            return (o is DBNull || string.IsNullOrWhiteSpace(o.ToString()));
+            return (o==null||o is DBNull || string.IsNullOrWhiteSpace(o.ToString()));
         }
     }
     #endregion
@@ -2024,7 +2162,7 @@ namespace C
     {
         public HttpWebResponse rsp;
         public Stream strm;
-        public string charset, html, title, body, time, author, origin;
+        public string charset, html, title, body, time, author, origin, rs;
         public picker(string url, string encoding = "", int times = 5000)
         {
             //WebClient wc=new WebClient();
@@ -2034,15 +2172,19 @@ namespace C
 
             HttpWebRequest rqt = WebRequest.Create(url) as HttpWebRequest;
             //rqt.KeepAlive = true;
-
+            //rqt.ContentType = "application/json; charset=utf-8";
             rqt.Timeout = times;
             rqt.UserAgent = "MSIE 7.0; Windows NT 5.1";
             //Mozilla/5.0 (Windows NT 6.3; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.96 Safari/537.36
             try
             {
+
                 this.rsp = rqt.GetResponse() as HttpWebResponse;//ISO-8859-1GB2312
+
                 charset = string.IsNullOrWhiteSpace(encoding) ? (rsp.CharacterSet == "ISO-8859-1" ? "GB2312" : string.IsNullOrWhiteSpace(rsp.CharacterSet) ? "UTF-8" : rsp.CharacterSet) : encoding;
+               // rsp.ContentType = "application/json; charset=utf-8";
                 this.strm = rsp.GetResponseStream();
+                this.rs = new StreamReader(this.strm).ReadToEnd();
                 // ServicePointManager.DefaultConnectionLimit = 200;
             }
             catch (WebException e)
@@ -2184,8 +2326,8 @@ namespace C
     #region 计时器
     public class timer
     {
-        private Timer t;
-        public Timer T
+        private System.Threading.Timer t;
+        public System.Threading.Timer T
         {
             get { return t; }
             set { t = value; }
@@ -2199,7 +2341,7 @@ namespace C
         //private AutoResetEvent e = new AutoResetEvent(false);解决方法重入问题
         public timer(TimerCallback cb, string[] arg, string id, int due, int period)
         {
-            t = new Timer(cb, arg, due, period);
+            t = new System.Threading.Timer(cb, arg, due, period);
             ls.Add(id, this);
         }
         public static int stop(string id)
