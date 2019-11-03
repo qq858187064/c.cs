@@ -81,30 +81,51 @@ namespace C
         /// </summary>
         public static HttpContext hc { get { return HttpContext.Current; } }
         /// <summary>
-        /// 已登录用户实体
+        /// 获取用户实体对象u
+        /// </summary>
+        public static u u
+        {
+            get
+            {
+                return session<u>("u");
+            }
+        }
+        /// <summary>
+        /// 判断用户实体cu是否存在，存在代表已经登录，否而为匿名用户
+        /// </summary>
+        public static bool hsu
+        {
+            get
+            {
+                return C.u == null?false:true;
+            }
+        }
+        /// <summary>
+        /// 使用已登录用户实体
         /// </summary>
         public static u cu { get {
-            u cu = session<u>("u");
-            /*
-              if (cu == null && C.hc.Request.Path != "/login")
-               {
+           // u cu = session<u>("u");if(C.G('lgb'))lgb.click()
+            if (!C.hsu && C.hc.Request.Path != "/login")
+              {
+                /*
+                  String className = MethodBase.GetCurrentMethod().ReflectedType.Name;
+                  System.Diagnostics.StackTrace trace = new System.Diagnostics.StackTrace();
+                MethodBase methodName = trace.GetFrame(1).GetMethod();*/
+                  C.hc.Response.Write("<script>setTimeout(function(){pop.pop(lgb)},3333)</script>");
+                  //C.hc.Response.Write("<script>setTimeout(function(){pop.pop(lgb)console.log(123);var be=C.Ce('script');be.appendChild(document.createTextNode('pop.pop(lgb)'));C.Bd().appendChild(be)},3333)</script>");
                    //最好触发js弹出登录框
                    //C.hc.Response.StatusCode = 403;
+                  /*
                    string p = "~/login?url=" + C.hc.Request.Path;
                    C.hc.Server.TransferRequest(p);
-                   //C.hc.Response.End();
-
-
                    ContentResult cr = new ContentResult();
                    cr.Content = "<script>alert(123)</script>";
                    C.hc.Response.Write(cr.Content);
-                   //Exception er = new Exception("current user null");
-                   //throw er;
-               }   */      
-
-               return cu;
+                  */
+               }         
+               return u;
             //如果session中没有，跳到登录？
-                 //return session<u>("u");
+            //return session<u>("u");
             } }
 
         #endregion
@@ -1496,7 +1517,7 @@ foreach (var item in jobj)
             try
             {
                 if (con.State != ConnectionState.Open)
-                    con.Open();
+                    con.Open();//有时报ConnectionString 属性尚未初始化。
                 object[] p = ps;
                 for (int i = 0; i < cs.Length; i++)
                 {
@@ -1991,7 +2012,7 @@ foreach (var item in jobj)
         //public int did { get; set; }//控件实例记录id
         public mo()
         {
-
+            
          }
     }
     #endregion
@@ -2076,7 +2097,6 @@ foreach (var item in jobj)
 
             }
         }
-
         public static void Runjs(Control ctl, string js)
         {
             LiteralControl l = new LiteralControl();
