@@ -84,11 +84,9 @@ namespace C
         /// 获取用户实体对象u
         /// </summary>
         public static u u
-        {
-            get
-            {
+        {get{
                 return session<u>("u");
-            }
+        }
         }
         /// <summary>
         /// 判断用户实体cu是否存在，存在代表已经登录，否而为匿名用户
@@ -111,7 +109,9 @@ namespace C
                   String className = MethodBase.GetCurrentMethod().ReflectedType.Name;
                   System.Diagnostics.StackTrace trace = new System.Diagnostics.StackTrace();
                 MethodBase methodName = trace.GetFrame(1).GetMethod();*/
-                  C.hc.Response.Write("<script>setTimeout(function(){pop.pop(lgb)},3333)</script>");
+                  C.hc.Response.Write("<script>setTimeout(function(){pop.pop(lgb)},444)</script>");
+                  C.hc.Response.Flush();
+                  C.hc.Response.End();
                   //C.hc.Response.Write("<script>setTimeout(function(){pop.pop(lgb)console.log(123);var be=C.Ce('script');be.appendChild(document.createTextNode('pop.pop(lgb)'));C.Bd().appendChild(be)},3333)</script>");
                    //最好触发js弹出登录框
                    //C.hc.Response.StatusCode = 403;
@@ -408,7 +408,33 @@ namespace C
                 }
             }
         }
+        /// <summary>
+        /// 获取Cookie值
+        /// </summary>
+        /// <param name="key">cookie名称</param>
+        /// <returns></returns>
+        public static string cookie(string k)
+        {
+            HttpCookie cookie = C.hc.Request.Cookies[k];
+            string v = "";
+            if (C.hc != null&&cookie != null)
+                v = cookie.Value;
+            return v;
+        }
+        public static void cookie(string k, string v, int minute, string path = "", string domain = "")
+        {
+            HttpContext context = C.hc;
+            if (context == null)
+                return;
+            HttpCookie cookie = new HttpCookie(k, v);
+            cookie.Expires = DateTime.Now.AddMinutes(minute);
+            if (!string.IsNullOrEmpty(path))
+                cookie.Path = path;
+            if (!string.IsNullOrEmpty(domain))
+                cookie.Domain = domain;
 
+            context.Response.Cookies.Add(cookie);
+        }
         #region 未审核的________Cookie和Session操作
 
         /// <summary>
@@ -445,9 +471,8 @@ namespace C
         /// <returns></returns>
         public static string GetCookie(string key)
         {
-            HttpContext context = C.hc;
-            HttpCookie cookie = context.Request.Cookies[key];
-            if (context == null || cookie == null)
+            HttpCookie cookie = C.hc.Request.Cookies[key];
+            if (C.hc == null || cookie == null)
                 return string.Empty;
             return cookie.Value;
         }
@@ -1712,7 +1737,7 @@ foreach (var item in jobj)
         {
             SqlDataAdapter sda = new SqlDataAdapter(Cmd);
             DataTable tb = new DataTable();
-            sda.Fill(tb);
+            sda.Fill(tb);//ExecuteReader 要求已打开且可用的 Connection。连接的当前状态为打开。
             return tb;
             //using (SqlDataReader r = Cmd.ExecuteReader())
             //{
