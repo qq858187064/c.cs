@@ -41,7 +41,6 @@ namespace C
         {
             Console.WriteLine("Multiplying by 2: {0} gives {1}", value, value * 2);
         }
-
         public static void Square(double value)
         {
             Console.WriteLine("Squaring: {0} gives {1}", value, value * value);
@@ -445,11 +444,15 @@ namespace C
         public static T session<T>(string key)
         {
             T o = default(T);
-            HttpContext hc = C.hc;
-            object s = hc.Session[key];
+            object s = C.hc.Session[key];
             if (s != null)
                 o = (T)s;
             return o;
+        }
+        public static void session<T>(string k,object v)
+        {
+
+            C.hc.Session[k] = v;
         }
         /// <summary>
         /// 设置Session
@@ -555,37 +558,23 @@ namespace C
             catch (SmtpException e)
             {
                 throw e;
-
             }
-
             /*
-                 MailMessage msg = new MailMessage();
-
+         MailMessage msg = new MailMessage();
         msg.To.Add("858652407@qq.com");//收件人地址 
         //msg.CC.Add("cc@qq.com");//抄送人地址 
-
         msg.From = new MailAddress("858187064@qq.com", "test");//发件人邮箱，名称 
-
         msg.Subject = "This is a test email from QQ";//邮件标题 
         msg.SubjectEncoding = Encoding.UTF8;//标题格式为UTF8 
-
         msg.Body = "this is body";//邮件内容 
         msg.BodyEncoding = Encoding.UTF8;//内容格式为UTF8 
-
         SmtpClient client = new SmtpClient();
-
         client.Host = "smtp.qq.com";//SMTP服务器地址 
         client.Port = 587;//SMTP端口，QQ邮箱填写587 
-
         client.EnableSsl = true;//启用SSL加密 
-                                //发件人邮箱账号，授权码(注意此处，是授权码你需要到qq邮箱里点设置开启Smtp服务，然后会提示你第三方登录时密码处填写授权码)
+        //发件人邮箱账号，授权码(注意此处，是授权码你需要到qq邮箱里点设置开启Smtp服务，然后会提示你第三方登录时密码处填写授权码)
         client.Credentials = new System.Net.NetworkCredential("858187064@qq.com", "jwyezkrjqahlbdeg");
-
             client.Send(msg);//发送邮件
-
-
-
-
                          /// <summary>
              /// 获取邮箱发送模板
              /// </summary>
@@ -601,7 +590,6 @@ namespace C
                  }
                  return string.Empty;
              }
-
      */
             return result;
         }
@@ -776,6 +764,7 @@ foreach (var item in jobj)
         
     }
 
+
     /*
     /// <summary>
     /// 该类中的ToDynamic方法，用于从任意对象扩展出一个动态类型的对象。这个动态类型会根据输入对象中的属性信息，生成对应的公有字段，然后使用反射进行赋值。
@@ -823,6 +812,8 @@ foreach (var item in jobj)
     }
 
     */
+   
+
     #region 验证类手机号、邮箱
     public class validate
     {
