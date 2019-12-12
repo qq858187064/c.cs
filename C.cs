@@ -125,7 +125,10 @@ namespace C
                return u;
             //如果session中没有，跳到登录？
             //return session<u>("u");
-            } }
+            }
+            set { cu = value; }
+
+        }
 
         #endregion
         #region 泛型类型转换
