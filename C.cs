@@ -41,7 +41,6 @@ namespace C
         {
             Console.WriteLine("Multiplying by 2: {0} gives {1}", value, value * 2);
         }
-
         public static void Square(double value)
         {
             Console.WriteLine("Squaring: {0} gives {1}", value, value * value);
@@ -81,30 +80,51 @@ namespace C
         /// </summary>
         public static HttpContext hc { get { return HttpContext.Current; } }
         /// <summary>
-        /// 已登录用户实体
+        /// 获取用户实体对象u
+        /// </summary>
+        public static u u
+        {get{
+                return session<u>("u");
+        }
+        }
+        /// <summary>
+        /// 判断用户实体cu是否存在，存在代表已经登录，否而为匿名用户
+        /// </summary>
+        public static bool hsu
+        {
+            get
+            {
+                return C.u == null?false:true;
+            }
+        }
+        /// <summary>
+        /// 使用已登录用户实体
         /// </summary>
         public static u cu { get {
-            u cu = session<u>("u");
-            /*
-              if (cu == null && C.hc.Request.Path != "/login")
-               {
+           // u cu = session<u>("u");if(C.G('lgb'))lgb.click()
+            if (!C.hsu && C.hc.Request.Path != "/login")
+              {
+                /*
+                  String className = MethodBase.GetCurrentMethod().ReflectedType.Name;
+                  System.Diagnostics.StackTrace trace = new System.Diagnostics.StackTrace();
+                MethodBase methodName = trace.GetFrame(1).GetMethod();*/
+                  C.hc.Response.Write("<script>setTimeout(function(){pop.pop(lgb)},444)</script>");
+                  C.hc.Response.Flush();
+                  C.hc.Response.End();
+                  //C.hc.Response.Write("<script>setTimeout(function(){pop.pop(lgb)console.log(123);var be=C.Ce('script');be.appendChild(document.createTextNode('pop.pop(lgb)'));C.Bd().appendChild(be)},3333)</script>");
                    //最好触发js弹出登录框
                    //C.hc.Response.StatusCode = 403;
+                  /*
                    string p = "~/login?url=" + C.hc.Request.Path;
                    C.hc.Server.TransferRequest(p);
-                   //C.hc.Response.End();
-
-
                    ContentResult cr = new ContentResult();
                    cr.Content = "<script>alert(123)</script>";
                    C.hc.Response.Write(cr.Content);
-                   //Exception er = new Exception("current user null");
-                   //throw er;
-               }   */      
-
-               return cu;
+                  */
+               }         
+               return u;
             //如果session中没有，跳到登录？
-                 //return session<u>("u");
+            //return session<u>("u");
             } }
 
         #endregion
@@ -387,7 +407,33 @@ namespace C
                 }
             }
         }
+        /// <summary>
+        /// 获取Cookie值
+        /// </summary>
+        /// <param name="key">cookie名称</param>
+        /// <returns></returns>
+        public static string cookie(string k)
+        {
+            HttpCookie cookie = C.hc.Request.Cookies[k];
+            string v = "";
+            if (C.hc != null&&cookie != null)
+                v = cookie.Value;
+            return v;
+        }
+        public static void cookie(string k, string v, int minute, string path = "", string domain = "")
+        {
+            HttpContext context = C.hc;
+            if (context == null)
+                return;
+            HttpCookie cookie = new HttpCookie(k, v);
+            cookie.Expires = DateTime.Now.AddMinutes(minute);
+            if (!string.IsNullOrEmpty(path))
+                cookie.Path = path;
+            if (!string.IsNullOrEmpty(domain))
+                cookie.Domain = domain;
 
+            context.Response.Cookies.Add(cookie);
+        }
         #region 未审核的________Cookie和Session操作
 
         /// <summary>
@@ -398,11 +444,15 @@ namespace C
         public static T session<T>(string key)
         {
             T o = default(T);
-            HttpContext hc = C.hc;
-            object s = hc.Session[key];
+            object s = C.hc.Session[key];
             if (s != null)
                 o = (T)s;
             return o;
+        }
+        public static void session<T>(string k,object v)
+        {
+
+            C.hc.Session[k] = v;
         }
         /// <summary>
         /// 设置Session
@@ -424,9 +474,8 @@ namespace C
         /// <returns></returns>
         public static string GetCookie(string key)
         {
-            HttpContext context = C.hc;
-            HttpCookie cookie = context.Request.Cookies[key];
-            if (context == null || cookie == null)
+            HttpCookie cookie = C.hc.Request.Cookies[key];
+            if (C.hc == null || cookie == null)
                 return string.Empty;
             return cookie.Value;
         }
@@ -509,37 +558,23 @@ namespace C
             catch (SmtpException e)
             {
                 throw e;
-
             }
-
             /*
-                 MailMessage msg = new MailMessage();
-
+         MailMessage msg = new MailMessage();
         msg.To.Add("858652407@qq.com");//收件人地址 
         //msg.CC.Add("cc@qq.com");//抄送人地址 
-
         msg.From = new MailAddress("858187064@qq.com", "test");//发件人邮箱，名称 
-
         msg.Subject = "This is a test email from QQ";//邮件标题 
         msg.SubjectEncoding = Encoding.UTF8;//标题格式为UTF8 
-
         msg.Body = "this is body";//邮件内容 
         msg.BodyEncoding = Encoding.UTF8;//内容格式为UTF8 
-
         SmtpClient client = new SmtpClient();
-
         client.Host = "smtp.qq.com";//SMTP服务器地址 
         client.Port = 587;//SMTP端口，QQ邮箱填写587 
-
         client.EnableSsl = true;//启用SSL加密 
-                                //发件人邮箱账号，授权码(注意此处，是授权码你需要到qq邮箱里点设置开启Smtp服务，然后会提示你第三方登录时密码处填写授权码)
+        //发件人邮箱账号，授权码(注意此处，是授权码你需要到qq邮箱里点设置开启Smtp服务，然后会提示你第三方登录时密码处填写授权码)
         client.Credentials = new System.Net.NetworkCredential("858187064@qq.com", "jwyezkrjqahlbdeg");
-
             client.Send(msg);//发送邮件
-
-
-
-
                          /// <summary>
              /// 获取邮箱发送模板
              /// </summary>
@@ -555,7 +590,6 @@ namespace C
                  }
                  return string.Empty;
              }
-
      */
             return result;
         }
@@ -730,6 +764,7 @@ foreach (var item in jobj)
         
     }
 
+
     /*
     /// <summary>
     /// 该类中的ToDynamic方法，用于从任意对象扩展出一个动态类型的对象。这个动态类型会根据输入对象中的属性信息，生成对应的公有字段，然后使用反射进行赋值。
@@ -777,6 +812,8 @@ foreach (var item in jobj)
     }
 
     */
+   
+
     #region 验证类手机号、邮箱
     public class validate
     {
@@ -1496,7 +1533,7 @@ foreach (var item in jobj)
             try
             {
                 if (con.State != ConnectionState.Open)
-                    con.Open();
+                    con.Open();//有时报ConnectionString 属性尚未初始化。
                 object[] p = ps;
                 for (int i = 0; i < cs.Length; i++)
                 {
@@ -1691,7 +1728,7 @@ foreach (var item in jobj)
         {
             SqlDataAdapter sda = new SqlDataAdapter(Cmd);
             DataTable tb = new DataTable();
-            sda.Fill(tb);
+            sda.Fill(tb);//ExecuteReader 要求已打开且可用的 Connection。连接的当前状态为打开。
             return tb;
             //using (SqlDataReader r = Cmd.ExecuteReader())
             //{
@@ -1991,7 +2028,7 @@ foreach (var item in jobj)
         //public int did { get; set; }//控件实例记录id
         public mo()
         {
-
+            
          }
     }
     #endregion
@@ -2076,7 +2113,6 @@ foreach (var item in jobj)
 
             }
         }
-
         public static void Runjs(Control ctl, string js)
         {
             LiteralControl l = new LiteralControl();
