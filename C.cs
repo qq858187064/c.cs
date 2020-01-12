@@ -452,9 +452,8 @@ namespace C
                 o = (T)s;
             return o;
         }
-        public static void session<T>(string k,object v)
+        public static void session(string k,object v)
         {
-
             C.hc.Session[k] = v;
         }
         /// <summary>
@@ -693,16 +692,17 @@ foreach (var item in jobj)
          */
         public static string ser<T>(T o)
             {
-                //return new JavaScriptSerializer().Serialize(o);
-                return JsonConvert.SerializeObject(o);
+                return new JavaScriptSerializer().Serialize(o);
+               // return JsonConvert.SerializeObject(o);
             }
-            /// <summary>
-            /// 将json字符串反序列化成对象
-            /// </summary>
-        public static JObject deser(string json)
+        /// <summary>
+        /// 将json字符串反序列化成对象
+        /// </summary>
+        public static T deser<T>(string json)
+      //  public static JObject deser(string json)
             {
-                //return (T)new JavaScriptSerializer().Deserialize(json, typeof(T));
-                return JsonConvert.DeserializeObject(json) as JObject;
+               return (T)new JavaScriptSerializer().Deserialize(json, typeof(T));
+                 //return JsonConvert.DeserializeObject(json) as JObject;
             }
             /// <summary>
             /// 生成验证码
@@ -1560,7 +1560,6 @@ foreach (var item in jobj)
                         t.TableName = t.TableName + i.ToString();
                         ds.Tables.Add(t);//暂时假定每个存储过程只返回一个表
                     }
-
                     //if (i == 0 && cs.Length > 1 && tmp is DataSet)
                     //    tmp = new DataSet();
                 }
