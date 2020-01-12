@@ -25,4 +25,10 @@ E:\C\bin\Debug\C.dll
 E:\C\bin\Debug\C.pdb
 E:\C\obj\Debug\C.dll
 E:\C\obj\Debug\C.pdb
-E:\C\obj\Debug\C.csprojResolveAssemblyReference.cache
+E:\ccs\obj\Debug\C.csprojAssemblyReference.cache
+E:\C\obj\Debug\C.csprojAssemblyReference.cache
+E:\C\bin\Debug\Newtonsoft.Json.dll
+E:\C\bin\Debug\System.Web.Helpers.dll
+E:\C\bin\Debug\System.Web.Mvc.dll
+E:\C\bin\Debug\System.Web.Webpages.dll
+E:\C\obj\Debug\C.csproj.CopyComplete
