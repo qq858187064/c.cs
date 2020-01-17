@@ -79,6 +79,9 @@ namespace C
         /// 当前运行时对象
         /// </summary>
         public static HttpContext hc { get { return HttpContext.Current; } }
+
+        public static string appid { get { return Gfig("appid"); } }
+        public static string secret { get { return Gfig("secret"); } }
         /// <summary>
         /// 获取用户实体对象u
         /// </summary>
@@ -1223,6 +1226,12 @@ foreach (var item in jobj)
         public string head { get; set; }
         public string pwd { get; set; }
         public string ticket { get; set; }
+
+        /// <summary>
+        /// 微信的unionid暂时是openid
+        /// </summary>
+        public string wx { get; set; }
+
         //public int failCount { get; set; }
         public u() { }
         //public u(String act, String pwd)
