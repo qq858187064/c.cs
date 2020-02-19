@@ -28,12 +28,12 @@ using System.Drawing.Imaging;
 using System.Web.Script.Serialization;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using System.Collections.Specialized;
 #endregion
 
 
 namespace C
 {
-
     #region  多播委托实例
     class MathOperations
     {
@@ -79,9 +79,11 @@ namespace C
         /// 当前运行时对象
         /// </summary>
         public static HttpContext hc { get { return HttpContext.Current; } }
-
-        public static string appid { get { return Gfig("appid"); } }
-        public static string secret { get { return Gfig("secret"); } }
+        public static string appid { get { return appset["appid"]; } }
+        public static string secret { get { return appset["secret"]; } }
+        public static string origin { get { return appset["origin"]; } }
+        public static NameValueCollection appset {
+            get { return ConfigurationManager.AppSettings; } }
         /// <summary>
         /// 获取用户实体对象u
         /// </summary>
@@ -100,9 +102,12 @@ namespace C
                 return C.u == null?false:true;
             }
         }
+
+
         /// <summary>
         /// 使用已登录用户实体
         /// </summary>
+        private static u Cu;
         public static u cu { get {
            // u cu = session<u>("u");if(C.G('lgb'))lgb.click()
             if (!C.hsu && C.hc.Request.Path != "/login")
@@ -124,12 +129,14 @@ namespace C
                    cr.Content = "<script>alert(123)</script>";
                    C.hc.Response.Write(cr.Content);
                   */
-               }         
-               return u;
+               }
+                return session<u>("u"); // u;
             //如果session中没有，跳到登录？
             //return session<u>("u");
             }
-            set { cu = value; }
+            set {
+                Cu = value;
+            }
 
         }
 
