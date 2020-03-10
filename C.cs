@@ -714,6 +714,23 @@ foreach (var item in jobj)
                return (T)new JavaScriptSerializer().Deserialize(json, typeof(T));
                  //return JsonConvert.DeserializeObject(json) as JObject;
             }
+        /// <summary>Unix时间戳
+        /// 返回1970-1-1至今时间差，单位：毫秒
+        /// </summary>
+        /// <returns></returns>
+        public static long stamp()
+        {
+            return DateTime.Now.ToUniversalTime().Ticks / 10000 - 62135596800000;//1毫秒=10000纳秒
+        }
+        /// <summary>Unix时间戳
+        /// 将unix时间戳转成当前时间
+        /// </summary>
+        /// <returns></returns>
+        public static DateTime time(long stamp)
+        {
+            return new DateTime((stamp + 62135596800000 + 8 * 60 * 60 * 1000) * 10000);
+        }
+        
             /// <summary>
             /// 生成验证码
             /// </summary>
