@@ -217,6 +217,7 @@ namespace C
                 Reader.GetValues(Os);
                 Ls.Add(Os);
             }
+            Reader.Close();
             return Ls;
         }
         #endregion
@@ -1205,11 +1206,14 @@ foreach (var item in jobj)
         /// 错误消息
         /// </summary>
         public string msg { get; set; }
-        String[] er = { "操作失败", "操作成功", "账号不存在", "账号已存在", "账号或密码不正确", "验证码错误", "票据过期，请重新登录", "权限不足" };
-        public result(int code)
+        String[] er = { "操作失败", "操作成功", "账号不存在", "账号已存在", "账号或密码不正确", "验证码错误", "票据过期，请重新登录", "权限不足"};
+        public result(int code,string msg=null)
         {
             this.code = code;
-            this.msg = code > -1 ? er[code] : "未标识的异常";
+            if (msg== null)
+                this.msg = code > -1 ? er[code] : "未标识的异常";
+            else
+                this.msg = msg;
         }
     }
     /// <summary>
@@ -1568,6 +1572,10 @@ foreach (var item in jobj)
             }
             try
             {
+                if(String.IsNullOrWhiteSpace(con.ConnectionString))
+                {
+                    con= Db.con(cn);//偿试解决//有时报ConnectionString 属性尚未初始化
+                }
                 if (con.State != ConnectionState.Open)
                     con.Open();//有时报ConnectionString 属性尚未初始化。
                 object[] p = ps;
@@ -1600,7 +1608,7 @@ foreach (var item in jobj)
                     tmp = (T)(object)ds; //(T)Convert.ChangeType(ds, typeof(T));
 
                 cmd.Dispose();//相册页报错ConnectionString 属性尚未初始化
-            }
+            }/*
             catch (SqlException e)
             {
                 //待处理
@@ -1608,10 +1616,10 @@ foreach (var item in jobj)
                 //if (typeof(T) == typeof(String))
                 //    return (T)(object)String.Empty;
                 HttpResponse rsp = C.hc.Response;
-                rsp.Write("数据库操作异常：" + e.Message);//e.Message，跳404？
+                rsp.Write("数据库操作异常：" + e.Message+"\n"+e.StackTrace);//e.Message，跳404？
                 rsp.End();
                 tmp = default(T);//(T)C.Cvt<string>(e.Message);
-            }
+            }*/
             finally
             {
                 if (cls == 1)
@@ -1680,7 +1688,7 @@ foreach (var item in jobj)
             //Cmd.Parameters.Clear();
             if (Ps.Length > 0)
             {
-                SqlCommandBuilder.DeriveParameters(Cmd);
+                SqlCommandBuilder.DeriveParameters(Cmd);//已有打开的与此 Command 相关联的 DataReader，必须首先将它关闭。
                 for (int j = 0, i = 0; j < Cmd.Parameters.Count && i < Ps.Length; j++)
                 {
                     SqlParameter Sp = Cmd.Parameters[j];
@@ -1738,13 +1746,20 @@ foreach (var item in jobj)
 
         public static SqlDataReader Reader(SqlCommand Cmd)
         {
+           /*
+            if (Cmd.Connection.State == ConnectionState.Closed)
+            {
+                Cmd.Connection.Open();//处理：//ExecuteReader 要求已打开且可用的 Connection。连接的当前状态为打开。
+            }*/
             return Cmd.ExecuteReader();
         }
         public static object[] Arr(SqlCommand Cmd)
         {
             using (SqlDataReader r = Cmd.ExecuteReader())
             {
-                return C.ToArray(r);
+                 object[] a = C.ToArray(r);
+                r.Close();
+                return a;
             }
 
         }
@@ -1763,7 +1778,12 @@ foreach (var item in jobj)
         {
             SqlDataAdapter sda = new SqlDataAdapter(Cmd);
             DataTable tb = new DataTable();
-            sda.Fill(tb);//ExecuteReader 要求已打开且可用的 Connection。连接的当前状态为打开。
+
+            if (Cmd.Connection.State == ConnectionState.Closed)
+            {
+                Cmd.Connection.Open();//处理：//ExecuteReader 要求已打开且可用的 Connection。连接的当前状态为打开。
+            }
+            sda.Fill(tb);
             return tb;
             //using (SqlDataReader r = Cmd.ExecuteReader())
             //{
