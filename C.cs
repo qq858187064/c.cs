@@ -760,6 +760,15 @@ foreach (var item in jobj)
                 */
                 return c;
             }
+        /// <summary>
+        /// 将传入字符串中间4位换成****,有需要再扩展
+        /// </summary>
+        /// <param name="s"></param>
+        /// <returns></returns>
+    public static string blur(string s)
+            {
+                return new Regex(@"^(\d{3})\d{4}(\d{4})$").Replace(s, "$1****$2");
+            }
 
         /*
         //json 序列化
@@ -1753,12 +1762,21 @@ foreach (var item in jobj)
             }*/
             return Cmd.ExecuteReader();
         }
-        public static object[] Arr(SqlCommand Cmd)
+       /* public static object[] Arr(SqlCommand Cmd)
         {
             using (SqlDataReader r = Cmd.ExecuteReader())
             {
                  object[] a = C.ToArray(r);
                 r.Close();
+                return a;
+            }
+
+        }*/
+        public static object[] Arr(SqlCommand Cmd)
+        {
+            using (DataTable r = Db.Tb(Cmd))
+            {
+                 object[] a = C.ToArray(r);
                 return a;
             }
 
