@@ -1486,7 +1486,7 @@ foreach (var item in jobj)
         /// <summary>
         /// 临时未关闭的connection集合，key为数据库名称
         /// </summary>
-        private static Dictionary<string, SqlConnection> tc = new Dictionary<string, SqlConnection>();
+        public static Dictionary<string, SqlConnection> tc = new Dictionary<string, SqlConnection>();
         /// <summary>
         /// 关闭、销毁tc中指定connection，并在tc中将它移除
         /// </summary>
@@ -1580,13 +1580,13 @@ foreach (var item in jobj)
                 }
             }
             try
-            {
+            {/*
                 if(String.IsNullOrWhiteSpace(con.ConnectionString))
                 {
                     con= Db.con(cn);//偿试解决//有时报ConnectionString 属性尚未初始化
-                }
+                }*/
                 if (con.State != ConnectionState.Open)
-                    con.Open();//有时报ConnectionString 属性尚未初始化。
+                    con.Open();//有时报ConnectionString 属性尚未初始化。超时时间已到。超时时间已到，但是尚未从池中获取连接。出现这种情况可能是因为所有池连接均在使用，并且达到了最大池大小。
                 object[] p = ps;
                 for (int i = 0; i < cs.Length; i++)
                 {
