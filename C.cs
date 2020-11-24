@@ -1584,9 +1584,22 @@ foreach (var item in jobj)
                 if(String.IsNullOrWhiteSpace(con.ConnectionString))
                 {
                     con= Db.con(cn);//偿试解决//有时报ConnectionString 属性尚未初始化
-                }*/
-                if (con.State != ConnectionState.Open)
-                    con.Open();//有时报ConnectionString 属性尚未初始化。超时时间已到。超时时间已到，但是尚未从池中获取连接。出现这种情况可能是因为所有池连接均在使用，并且达到了最大池大小。
+                }
+                if (con == null)
+                {
+                    string connectionString = GetconnStr();
+                    con = new SqlConnection(connectionString);
+                    con.Open();
+                }
+                else */if (con.State == ConnectionState.Closed)
+                {
+                    con.Open();
+                }
+                else if (con.State ==ConnectionState.Broken)
+                {
+                    con.Close();
+                    con.Open();
+                }
                 object[] p = ps;
                 for (int i = 0; i < cs.Length; i++)
                 {
@@ -1628,12 +1641,15 @@ foreach (var item in jobj)
                 rsp.Write("数据库操作异常：" + e.Message+"\n"+e.StackTrace);//e.Message，跳404？
                 rsp.End();
                 tmp = default(T);//(T)C.Cvt<string>(e.Message);
+
+             
+
             }*/
             finally
             {
                 if (cls == 1)
                 {
-                    // Db.close(con);
+                    // Db.close(con);if (con.State == ConnectionState.Open || con.State == ConnectionState.Broken)
                     tc.Remove(con.Database);
                     con.Close();
                     con.Dispose();
