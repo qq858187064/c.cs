@@ -206,7 +206,7 @@ namespace C
 
         #endregion
 
-        #region 用SqlDataReader将行的内容读入List并返回  该方法应该有错误
+        #region 用SqlDataReader将行的内容读入List并返回  该方法应该有错误 ，因SqlDataReader独占连接，尽可能避免使用
         public static List<object[]> ToList(SqlDataReader Reader)
         {
             List<object[]> Ls = new List<object[]>();
@@ -1215,7 +1215,7 @@ foreach (var item in jobj)
         /// 错误消息
         /// </summary>
         public string msg { get; set; }
-        String[] er = { "操作失败", "操作成功", "账号不存在", "账号已存在", "账号或密码不正确", "验证码错误", "票据过期，请重新登录", "权限不足"};
+        String[] er = { "操作失败", "操作成功", "账号不存在", "账号已存在", "账号或密码不正确", "验证码错误", "票据过期，请重新登录", "权限不足","馆号不存在"};
         public result(int code,string msg=null)
         {
             this.code = code;
@@ -1461,7 +1461,7 @@ foreach (var item in jobj)
     /// </summary>
     public class Db
     {
-        ///默认连接串的key
+        ///默认连接串的key                                         DataReader是独占连接的，每个DataReader都要占用一个连接
         private static readonly string dk;
         ///默认连接串
         //private static readonly string ds;// conStr(C.Gfig("DefaultDb"));
@@ -1493,12 +1493,14 @@ foreach (var item in jobj)
         /// <param name="con"></param>
         public static void ClsTc(string con)
         {
-            SqlConnection co = tc[con];
-            if (co != null)
-            {
-                co.Close();
-                co.Dispose();
-                tc.Remove(con);
+            if (tc.ContainsKey(con)) { 
+                SqlConnection co = tc[con];//给定关键字不在字典中
+                if (co != null)
+                {
+                    co.Close();
+                    co.Dispose();
+                    tc.Remove(con);
+                }
             }
             //tc.Remove(con.Database);
             //if (con != null && con.State != ConnectionState.Closed)
